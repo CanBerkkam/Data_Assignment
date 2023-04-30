@@ -1,0 +1,83 @@
+---
+title: "BMI-For-Age"
+format: html
+execute: 
+  echo: false
+  warning: false
+  message: false
+---
+```{r}
+#| label: setup
+#| include: false
+library(tidyverse)
+unicef_metadata <- read.csv("/cloud/project/unicef_metadata.csv", header=TRUE)
+unicef_BMI<-read.csv("/cloud/project/unicef_indicator_2.csv", header=TRUE)
+Unicef_Joined<- left_join(unicef_metadata,unicef_BMI)
+```
+## BMI-For-Age Definition:
+
+"***BMI-for-age*** is a measure of body fatness based on body mass index (BMI) and age. It is used to assess the weight status of children and teens from 2 to 19 years old. ***BMI-for-age*** is calculated by dividing weight in kilograms by height in meters squared."
+
+## Analysis Brief:
+This quarto report will provide four different graphs that describe trends and relations of ***BMI-for-age***. While obtaining these graphs the data from Unicef was used. The report will illustrate visualisation below.
+
+- A World Map Chart
+- A Bar Chart
+- A Scatter Plot
+- A Time series Chart
+
+## World Map
+
+Below a world map which has been colored accordingly with mean ***BMI-for-age*** can be found. World maps can be a useful tool to identify patterns across regions and countries.
+```{r}
+#| echo: false
+unicef_BMI_filtered<-filter(unicef_BMI, sex == "Total")
+unicef_BMI_by_country <- group_by(unicef_BMI_filtered, country)
+unicef_BMI_mean<-summarise(unicef_BMI_by_country, obs_value = mean(obs_value))
+map_world <- map_data("world") 
+map_BMI <- full_join(map_world, unicef_BMI_mean, by = c("region" = "country"))
+ggplot(data = map_BMI) +
+  aes(x = long, y = lat, group = group, fill = obs_value) +
+  geom_polygon()
+```
+
+## Bar Chart
+
+The second chart that was chosen to analyse the ***BMI-for-age*** metric is a bar chart.This bar chart aimed to compare how the ***BMI-for-age*** metric differed between the two genders. Below is the bar chart's illustration. From the bar chart it can be seen that boys have a higher ***BMI-for-age*** compared to the girls.
+```{r}
+#| echo: false
+Unicef_Joined %>% 
+  group_by(sex) %>% 
+  filter(sex != "Total") %>%
+  summarise(Mean_BMI = mean(obs_value)) %>% 
+  ggplot(aes(sex, Mean_BMI, fill = sex)) +
+  geom_col()
+```
+
+## Scatter Plot
+
+The third plot that was thought as meaningful to include in this report is the scatter plot. Scatter plots are mostly used to identify the relation between two variables. It is a heavily used tool in linear regression models as well. The metric that the scatter plot blow aimed to relate ***BMI-for-age*** with was the GDP per capita. The points are the mean values of both categories over the years. From the graph there is positive relation between GDP per capita and  ***BMI-for-age*** . However it should also be noted that the relation is not very strong. 
+```{r}
+#| echo: false
+Unicef_Joined %>%
+  group_by(country) %>%
+  summarise(Mean_BMI = mean(obs_value), GDP = first(GDP.per.capita..constant.2015.US..)) %>%
+  ggplot(aes(x = Mean_BMI, y =GDP)) +
+  geom_point() +
+  guides(color = "none")+
+  ylim(0,15000)+
+  geom_smooth(method = "lm")
+```
+## Time Series Chart
+
+Last but not least, it was believed that the use of a time series chart was necessary. The only thing that is constant in the world is change. Hence,every metric should be, if possible, demonstrated with a time series chart to understand the changes the metric occurred through time. Below is the illustration of a time series chart for  ***BMI-for-age*** . Upon looking at the time series chart it can be said that there are number of countries that has had a volatile ***BMI-for-age*** through time.
+```{r}
+#| echo: false
+unicef_BMI %>%
+  group_by(time_period, country) %>%
+  summarize(avg_BMI = mean(obs_value)) %>%
+  ggplot(aes(x = as.numeric(time_period), y = avg_BMI, color = country)) +
+  geom_line() +
+  scale_x_continuous(breaks = seq(1980, 2020, by = 5)) +
+  guides(color = "none")
+```
