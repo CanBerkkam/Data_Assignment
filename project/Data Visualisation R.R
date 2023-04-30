@@ -9,24 +9,7 @@ GDP_Per_Capita<-Unicef_Joined$GDP.per.capita..constant.2015.US..
 
 install.packages("tidyverse")
 library(tidyverse)
-#GDP&BMI
-ggplot(data = Unicef_Joined)+aes(x=Avg_Country_GDP_Per_Capita,y=BMI,color=country)+geom_point()+guides(color ="none")+ theme_bw()+xlim(0, 50000)
-ggplot(data = Unicef_Joined)+aes(x=BMI,y=GDP.per.capita..constant.2015.US..,color=country)+geom_col()+guides(color ="none")+ theme_bw()+ylim(0, 55000)
-ggplot(data = Unicef_Joined)+aes(x=BMI,y=GDP.per.capita..constant.2015.US..,color=country)+geom_point()+guides(color ="none")+ theme_bw()+ylim(0, 55000)
 
-GDP_avg_country<- Unicef_Joined %>% 
-  group_by(country) %>% 
-  summarise(m_GDP = mean(GDP.per.capita..constant.2015.US..))%>%
-  summarise(m_BMI = mean(BMI))
-ggplot(data = GDP_avg_country) +
-  aes(x = m_BMI, y = m_GDP) +
-  geom_point()
-
-Avg_Country_GDP_Per_Capita<-group_by(Unicef_Joined, country)
-summarise(Avg_Country_GDP_Per_Capita,avg_gdp=mean(GDP.per.capita..constant.2015.US..))
-
-Mean_Country_BMI<-group_by(Unicef_Joined,country)
-summarise(Mean_Country_BMI, m_BMI=mean(obs_value))
 
 #BAR CHART BY SEX DONE
 Unicef_Joined %>% 
